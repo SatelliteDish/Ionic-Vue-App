@@ -1,7 +1,6 @@
 <template>
   <ion-app>
     <ion-router-outlet />
-    <router-view></router-view>
   </ion-app>
 </template>
 
@@ -13,7 +12,7 @@ export default defineComponent({
   name: 'App',
   components: {
     IonApp,
-    IonRouterOutlet,
+    IonRouterOutlet
   }
 });
 </script>
