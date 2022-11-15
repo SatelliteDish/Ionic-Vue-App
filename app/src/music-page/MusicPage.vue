@@ -5,20 +5,22 @@
         <ion-title>{{ pageName }}</ion-title>
       </ion-toolbar>
       <ion-toolbar>
-        <ion-searchbar></ion-searchbar>
+        <ion-searchbar v-model="searchField" @keydown.enter="search"></ion-searchbar>
       </ion-toolbar>
     </ion-header>
     <ion-content>
       <ion-fab horizontal="center" vertical="bottom" slot="fixed">
-        <ion-fab-button id="open-modal"></ion-fab-button>
+        <ion-fab-button id="open-modal">
+          <ion-icon icon="https://unpkg.com/ionicons@5.5.2/dist/svg/add-circle-outline.svg" size="large" />
+        </ion-fab-button>
       </ion-fab>
       <ion-modal trigger="open-modal">
         <add-song-modal></add-song-modal>
       </ion-modal>
 
       <div id="container">
-        <ion-list v-for="song in songs" :key="song.id">
-          <song-component :song="song"></song-component>
+        <ion-list v-for="(songItem, index) in songs.values" :key="index">
+           <song-component :song="songItem"></song-component>
         </ion-list>
       </div>
     </ion-content>
@@ -26,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, Ref } from 'vue';
 import { IonPage,
          IonContent,
          IonList,
@@ -37,31 +39,29 @@ import { IonPage,
          IonSearchbar,
          IonToolbar,
          IonTitle,
+         IonIcon,
         } from '@ionic/vue';
-import { newSongItem  } from './song-item';
-import { newSongTag  } from './song-tag';
 import SongComponent from './SongComponent.vue';
 import AddSongModal from './AddSongModal.vue';
+import { saveSong, getSong, getAllSongs } from "../save-system/save-system"
+import { SongItem } from './song-item';
+
 
   export default defineComponent({
     name: "MusicPage",
+    async mounted() {
+      const songs = await getAllSongs();
+      this.songs = songs;
+      console.log("Mounted");
+    },
+
     setup() {
-      const funny = ref(newSongTag("funny", "primary",0));
-      const meme = ref(newSongTag("meme", "danger",1));
-      const shrek = ref(newSongTag("shrek", "warning",2));
-      const pop = ref(newSongTag("pop", "secondary",3));
-      const rap = ref(newSongTag("rap", "tertiary",4));
-      const classicRock = ref(newSongTag("classic rock", "green",5));
-      const sad = ref(newSongTag("sad", "dark",6));
-      const songs = ref([
-      newSongItem("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "Never Gonna Give You Up", [funny.value, meme.value, classicRock.value], 0),
-      newSongItem("https://www.youtube.com/watch?v=L_jWHffIx5E", "All Star", [funny.value, pop.value, meme.value, shrek.value], 1),
-      newSongItem("https://www.youtube.com/watch?v=SQCSxqScSVQ","Gangsters Paradise",[rap.value, sad.value, meme.value],2),
-      ]);
+      const songs: Ref<SongItem[]> = ref([]);
 
       return {
         songs,
         pageName: "Music",
+        searchField: "",
       };
     },
     components: {
@@ -77,6 +77,22 @@ import AddSongModal from './AddSongModal.vue';
         IonToolbar,
         IonSearchbar,
         IonTitle,
+        IonIcon,
     },
+    methods: {
+      async search() {
+        // const song = await getSong(this.searchField); 
+        // console.log(song);
+        // const val = this.songs.push(song);
+        // console.log(val);
+        
+        // console.log(this.songs.length)
+        const songs = await getAllSongs();
+        console.log(songs.length);
+        for(const item in songs) {
+          console.log(item);
+        }
+      },
+    }
 })
 </script>

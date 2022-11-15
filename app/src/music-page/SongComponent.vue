@@ -1,8 +1,8 @@
 <template>
     <ion-item>
         <ion-item :href="song.url">{{song.name}}</ion-item>
-        <ion-list v-for="tag in song.tags" :key="tag.id">
-            <ion-chip :color="tag.color">{{tag.name}} </ion-chip>
+        <ion-list v-for="(tag, index) in song.tags" :key="index">
+            <ion-chip color="danger">{{tag}} </ion-chip>
         </ion-list>
     </ion-item>
 </template>
@@ -28,12 +28,3 @@ export default defineComponent({
     },
 })
 </script>
-
-<style scoped>
-ion-content {
-    background-color: green;
-}
-h1 {
-    color: yellow;
-}
-</style>

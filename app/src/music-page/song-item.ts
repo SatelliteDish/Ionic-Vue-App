@@ -3,15 +3,13 @@ import { SongTag } from "./song-tag"
 export interface SongItem {
     url: string,
     name: string,
-    tags: SongTag[],
-    id: number,
+    tags: string[],
 }
 
-export function newSongItem(url: string, name: string, tags: SongTag[], id: number): SongItem {
+export function newSongItem(url: string, name: string, tags: string[], id: number): SongItem {
     return {
         url,
         name,
         tags,
-        id,
     }
 }
