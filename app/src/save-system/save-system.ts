@@ -1,10 +1,11 @@
 import { SongItem } from "@/music-page/song-item";
 import { Filesystem, Directory, WriteFileOptions, ReadFileOptions, ReadFileResult } from "@capacitor/filesystem";
-import { GetResult, Preferences } from "@capacitor/preferences";
-import { ref, watch, Ref } from "vue";
+import { Preferences } from "@capacitor/preferences";
+import { ref} from "vue";
 
 const SONG_STORAGE = "songs";
 
+//Array I cant assign to
 const songRegistry= ref<string[]>([]);
 
 export async function loadSongs() {
@@ -13,10 +14,11 @@ export async function loadSongs() {
     songRegistry.value = songList;
 }
 
+//Buggy Function
 function cacheSongs(path: string) {
   console.log("cached " + path );
   songRegistry.value = [path, ...songRegistry.value];
-  Preferences.set( {
+  Preferences.set({
       key: SONG_STORAGE,
       value: JSON.stringify(songRegistry.value),
   })
