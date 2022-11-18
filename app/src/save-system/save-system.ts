@@ -5,38 +5,38 @@ import { ref} from "vue";
 
 const SONG_STORAGE = "songs";
 
-export async function loadSongs(): Promise<string[]>{
-    console.log("Start get song names");
+const songRegistry = ref<string[]>([]);
+
+
+
+async function loadSongs() {
+    if(songRegistry.value.length !== 0) {
+        return;
+    }
     const list = await Preferences.get({key: SONG_STORAGE});
-    const songList: string[] = list.value ? JSON.parse(list.value) : [];
-    console.log("sending song names");
-    return songList;
+    songRegistry.value = list.value ? JSON.parse(list.value) : [];
 }
 
-//Buggy Function
 function cacheSongs(path: string, songRegistry: string[]) {
-  console.log("cached " + path );
   const count = songRegistry.push(path);
-  console.log("count = " + count + " last added item = " + songRegistry[count])
   Preferences.set({
       key: SONG_STORAGE,
       value: JSON.stringify(songRegistry),
   })
 }
 
-export async function saveSong (song: SongItem, songRegistry: string[]): Promise<string> {
+export async function saveSong (song: SongItem): Promise<string> {
     const saveData: WriteFileOptions = {
         path: song.name + "song.json",
         data: btoa(JSON.stringify(song)),
         directory: Directory.Data,
     };
     const savedFile = await Filesystem.writeFile(saveData);
-    cacheSongs(saveData.path, songRegistry);
+    cacheSongs(saveData.path, songRegistry.value);
     return saveData.path;
   }
 
 export async function getSong(path: string): Promise<SongItem> {
-    console.log("Start get song " + path);
     const saveData: ReadFileOptions = {
         path: path,
         directory: Directory.Data,
@@ -51,20 +51,16 @@ export async function getSong(path: string): Promise<SongItem> {
          
     }
     const result: SongItem = JSON.parse(atob(value.data));
-    console.log("Got " + result.name + ", sending")
     return result;
 }
 
-export async function getAllSongs(songRegistry: string[]): Promise<SongItem[]> {
+export async function getAllSongs(): Promise<SongItem[]> {
+    await loadSongs();
     const result: SongItem[] = [];
 
-    for (const path of songRegistry) {
-        console.log("Requesting " + path);
+    for (const path of songRegistry.value) {
         const song = await getSong(path);
-        console.log("Received " + song.name)
         result.push(song);
     }
-    console.log(result.length)
-    console.log("Sending song array");
     return result;
 }

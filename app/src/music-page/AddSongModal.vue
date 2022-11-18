@@ -6,13 +6,13 @@
             </ion-toolbar>
         </ion-header>
         <ion-item>
-            <ion-input placeholder="Please Enter a URL" type="url" v-model="url"/>
+            <ion-input placeholder="Please Enter a URL" type="url" v-model="url" @keydown.enter="submit"/>
         </ion-item>
         <ion-item>
-            <ion-input placeholder="Please Enter a Name" v-model="name"/>
+            <ion-input placeholder="Please Enter a Name" v-model="name" @keydown.enter="submit"/>
         </ion-item>
         <ion-item>
-            <ion-input placeholder="Please Enter your Tags Seperated by Commas" v-model="tags"/>
+            <ion-input placeholder="Please Enter your Tags Seperated by Commas" v-model="tags" @keydown.enter="submit"/>
         </ion-item>
 
         <ion-fab vertical="bottom" horizontal="center" slot="fixed">
@@ -54,23 +54,20 @@ export default defineComponent({
         IonFab,
         IonFabButton
     },
-    props: {
-        registry: {type: Array, required: true},
-    },
     methods: {
         submit() {
+            const protocol = "https://";
             const tagArray = this.tags.split(',');
             if(tagArray.length < 1 || this.url === "" || this.name === "") {
                 alert("failed");
+                return;
             }
-            else {
-                const song: SongItem = {
-                    url: this.url,
-                    name: this.name,
-                    tags: tagArray,
-                };
-                saveSong(song, this.registry as string[]);
+            if(this.url.slice(0, protocol.length) !== protocol) {
+                this.url = protocol + this.url;
             }
+            const song: SongItem = new SongItem(this.url,this.name,tagArray);
+            saveSong(song);
+            this.$emit('dismissed',song);
         },
     }
 })

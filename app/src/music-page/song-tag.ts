@@ -1,13 +1,8 @@
-export interface SongTag {
-    name: String,
-    color: string,
-    id: number,
+export class SongTag {
+    name: string = '';
+    color: string = '';
+    constructor(name: string, color: string) {
+        this.name = name;
+        this.color = color;
+    }
 };
-
-export function newSongTag (name: String, color: string, id: number): SongTag {
-    return {
-        name,
-        color,
-        id,
-    };
-}

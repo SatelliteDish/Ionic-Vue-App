@@ -1,15 +1,14 @@
 import { SongTag } from "./song-tag"
 
-export interface SongItem {
-    url: string,
-    name: string,
-    tags: string[],
-}
-
-export function newSongItem(url: string, name: string, tags: string[], id: number): SongItem {
-    return {
-        url,
-        name,
-        tags,
+export class SongItem {
+    url: string = '';
+    name: string = '';
+    tags: string[] = [];
+    constructor(url: string, name: string, tags: string[]) {
+        this.url = url;
+        this.name = name;
+        this.tags = tags;
     }
+
+    public containsTag = (tag: string) => this.tags.includes(tag); 
 }
