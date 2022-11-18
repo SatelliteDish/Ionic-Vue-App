@@ -9,26 +9,23 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
+      <ion-list id="list"   v-for="(songItem, index) in songs" :key="index">
+        <song-component :song="songItem" />
+      </ion-list>
       <ion-fab horizontal="center" vertical="bottom" slot="fixed">
         <ion-fab-button id="open-modal">
           <ion-icon icon="https://unpkg.com/ionicons@5.5.2/dist/svg/add-circle-outline.svg" size="large" />
         </ion-fab-button>
       </ion-fab>
       <ion-modal trigger="open-modal">
-        <add-song-modal></add-song-modal>
+        <add-song-modal :registry="songNames"></add-song-modal>
       </ion-modal>
-
-      <div id="container">
-        <ion-list v-for="(songItem, index) in songs.values" :key="index">
-           <song-component :song="songItem"></song-component>
-        </ion-list>
-      </div>
     </ion-content>
   </ion-page>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, Ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { IonPage,
          IonContent,
          IonList,
@@ -43,25 +40,42 @@ import { IonPage,
         } from '@ionic/vue';
 import SongComponent from './SongComponent.vue';
 import AddSongModal from './AddSongModal.vue';
-import { saveSong, getSong, getAllSongs } from "../save-system/save-system"
+import { loadSongs, getAllSongs } from "../save-system/save-system"
 import { SongItem } from './song-item';
 
 
   export default defineComponent({
     name: "MusicPage",
-    async mounted() {
-      const songs = await getAllSongs();
-      this.songs = songs;
-      console.log("Mounted");
+    async beforeCreate() {
+      const newSongsNames =  await loadSongs().then();
+      console.log("Got song Names");
+      this.songNames = this.songNames.concat(newSongsNames);
+      const newSongs = await getAllSongs(this.songNames).then();
+      console.log("Got songs!")
+      newSongs.forEach((song) => {
+          this.songs.push(song); 
+        })
+        this.loaded = true;
+      console.log("Page Data Loaded");
     },
 
     setup() {
-      const songs: Ref<SongItem[]> = ref([]);
+      let testsong: SongItem = {
+        url: "test",
+        name: "test",
+        tags: ["none"],
+      }
+      let loaded: boolean = false;
+      const songs = ref<SongItem[]>([]);
+      let songNames: string[] = [];
 
       return {
+        songNames,
         songs,
         pageName: "Music",
         searchField: "",
+        testsong,
+        loaded,
       };
     },
     components: {
@@ -87,11 +101,11 @@ import { SongItem } from './song-item';
         // console.log(val);
         
         // console.log(this.songs.length)
-        const songs = await getAllSongs();
+        const songs = await getAllSongs(this.songNames);
         console.log(songs.length);
-        for(const item in songs) {
-          console.log(item);
-        }
+        songs.forEach(function (song) {
+          console.log(song);
+        })
       },
     }
 })

@@ -9,7 +9,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { IonContent, IonItem, IonList, IonChip } from '@ionic/vue';
+import { IonItem, IonList, IonChip } from '@ionic/vue';
 import { SongItem } from './song-item';
 
 export default defineComponent({
@@ -17,11 +17,10 @@ export default defineComponent({
     props: {
         song: {type: Object as () => SongItem, required: true},
     },
-    setup() {
-        
+    mounted() {
+        console.log("MOUNTED COMPONENT OF TYPE " + this.song.name);
     },
     components: {
-        IonContent,
         IonItem,
         IonList,
         IonChip,

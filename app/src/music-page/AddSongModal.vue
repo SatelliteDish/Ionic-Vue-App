@@ -54,6 +54,9 @@ export default defineComponent({
         IonFab,
         IonFabButton
     },
+    props: {
+        registry: {type: Array, required: true},
+    },
     methods: {
         submit() {
             const tagArray = this.tags.split(',');
@@ -65,9 +68,8 @@ export default defineComponent({
                     url: this.url,
                     name: this.name,
                     tags: tagArray,
-                    id: 0,
-                }
-                saveSong(song);
+                };
+                saveSong(song, this.registry as string[]);
             }
         },
     }
