@@ -5,7 +5,7 @@
         <ion-title>{{ pageName }}</ion-title>
       </ion-toolbar>
       <ion-toolbar>
-        <ion-searchbar v-model="searchField" @keydown.enter="search"></ion-searchbar>
+        <ion-searchbar v-model="searchField"></ion-searchbar>
       </ion-toolbar>
     </ion-header>
     <ion-content>
@@ -40,7 +40,7 @@ import { IonPage,
         } from '@ionic/vue';
 import SongComponent from './SongComponent.vue';
 import AddSongModal from './AddSongModal.vue';
-import { getAllSongs } from "../save-system/save-system"
+import { getAllSongs, removeSong } from "../save-system/save-system"
 import { SongItem } from './song-item';
 
 
@@ -77,9 +77,6 @@ import { SongItem } from './song-item';
         IonIcon,
     },
     methods: {
-      async search() {
-        
-      },
       addSongOpen() {
         this.modalOpen = true;
       },
@@ -87,8 +84,20 @@ import { SongItem } from './song-item';
         this.modalOpen = false;
         this.songs.push(song);
       },
-      removeSong(song: SongItem) {
-        alert("success")
+      async removeSong(song: SongItem) {
+        if(!this.songs.includes(song)) {
+          throw new Error("Song Not Found, how did you do this?");
+        }
+        try {
+          await removeSong(song);
+        }
+        catch(e: any) {
+          console.log(e.message);
+        }
+        const index: number = this.songs.indexOf(song);
+        console.log(index);
+        this.songs.splice(index, 1);
+        
       }
     }
 })

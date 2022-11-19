@@ -12,6 +12,9 @@
             <ion-input placeholder="Please Enter a Name" v-model="name" @keydown.enter="submit"/>
         </ion-item>
         <ion-item>
+            <ion-input placeholder="Artist (Optional)" v-model="artist" @keydown.enter="submit" />
+        </ion-item>
+        <ion-item>
             <ion-input placeholder="Please Enter your Tags Seperated by Commas" v-model="tags" @keydown.enter="submit"/>
         </ion-item>
 
@@ -41,6 +44,7 @@ export default defineComponent({
         return {
             url: "",
             name: "",
+            artist: "",
             tags: "",
         }
     },
@@ -57,7 +61,7 @@ export default defineComponent({
     methods: {
         submit() {
             const protocol = "https://";
-            const tagArray = this.tags.split(',');
+            const tagArray: string[] = this.tags.split(',');
             if(tagArray.length < 1 || this.url === "" || this.name === "") {
                 alert("failed");
                 return;
@@ -65,7 +69,8 @@ export default defineComponent({
             if(this.url.slice(0, protocol.length) !== protocol) {
                 this.url = protocol + this.url;
             }
-            const song: SongItem = new SongItem(this.url,this.name,tagArray);
+            
+            const song: SongItem = new SongItem(this.url,this.name,this.artist,tagArray);
             saveSong(song);
             this.$emit('dismissed',song);
         },
