@@ -1,9 +1,9 @@
-import { SongTag } from "./song-tag"
+// import { SongTag } from "./song-tag"
 
 export class SongItem {
-    url: string = '';
-    name: string = '';
-    artist: string = '';
+    url = '';
+    name = '';
+    artist = '';
     tags: string[] = [];
     constructor(url: string, name: string, artist?: string ,tags?: string[]) {
         this.url = url;
