@@ -10,21 +10,22 @@
     </ion-header>
     <ion-content>
       <ion-list id="list" v-for="(songItem, index) in songs" :key="index">
-        <song-component :song="songItem" @removeSong="removeSong" />
+        <song-component :song="songItem" @removeSong="removeSong" @editSong="editSong" />
       </ion-list>
       <ion-fab horizontal="center" vertical="bottom" slot="fixed">
-        <ion-fab-button @click="addSongOpen">
+        <ion-fab-button @click="songModalOpen">
           <ion-icon icon="https://unpkg.com/ionicons@5.5.2/dist/svg/add-circle-outline.svg" size="large" />
         </ion-fab-button>
       </ion-fab>
-      <ion-modal trigger="addSong" :isOpen="modalOpen">
-        <add-song-modal @dismissed="addSongDismiss" />
+      <ion-modal :isOpen="songModalisOpen" @didDismiss="addSongDismiss" >
+        <song-modal :song="songToEdit" @dismissed="addSongDismiss" />
       </ion-modal>
     </ion-content>
   </ion-page>
 </template>
 
 <script lang="ts">
+
 import { defineComponent, ref } from 'vue';
 import { IonPage,
          IonContent,
@@ -39,27 +40,41 @@ import { IonPage,
          IonIcon,
         } from '@ionic/vue';
 import SongComponent from './SongComponent.vue';
-import AddSongModal from './AddSongModal.vue';
-import { getAllSongs, removeSong } from "../save-system/save-system"
+import SongModal from './SongModal.vue';
+import { SaveSystem } from "../save-system/save-system"
 import { SongItem } from './song-item';
 
 
   export default defineComponent({
     name: "MusicPage",
-    async beforeCreate() {
-      this.songs = await getAllSongs();
-    },
-
+    
     setup() {
+      const saveSystem = new SaveSystem();
       const songs = ref<SongItem[]>([]);
-      let modalOpen = ref<Boolean>(false);
-
+      const songModalisOpen = ref<boolean>(false);
+      let songToEdit: SongItem | undefined;
+      const songIsValid = (song: SongItem) => {
+        if(song.url.length === 0 || song.name.length === 0) {
+          return false;
+        }
+        return true;
+      }
+      
       return {
+        saveSystem,
         songs,
         pageName: "Music",
         searchField: "",
-        modalOpen,
+        songModalisOpen,
+        songToEdit,
+        songIsValid,
       };
+    },
+    async mounted() {
+      console.log("Setup start!");
+      await this.saveSystem.setup();
+      console.log("save system setup!");
+      this.songs = await this.saveSystem.getAllSongs()
     },
     components: {
         IonPage,
@@ -69,7 +84,7 @@ import { SongItem } from './song-item';
         IonFab,
         IonFabButton,
         IonModal,
-        AddSongModal,
+        SongModal,
         IonHeader,
         IonToolbar,
         IonSearchbar,
@@ -77,28 +92,39 @@ import { SongItem } from './song-item';
         IonIcon,
     },
     methods: {
-      addSongOpen() {
-        this.modalOpen = true;
+      songModalOpen() {
+        this.songModalisOpen = true;
       },
       addSongDismiss(song: SongItem) {
-        this.modalOpen = false;
-        this.songs.push(song);
+        this.songModalisOpen = false;
+        if(this.songIsValid(song)) {
+          this.songs.push(song);
+        }
       },
       async removeSong(song: SongItem) {
         if(!this.songs.includes(song)) {
           throw new Error("Song Not Found, how did you do this?");
         }
         try {
-          await removeSong(song);
+          await this.saveSystem.removeSong(song);
         }
         catch(e: any) {
           console.log(e.message);
         }
         const index: number = this.songs.indexOf(song);
-        console.log(index);
         this.songs.splice(index, 1);
         
-      }
-    }
+      },
+      editSong(song: SongItem) {
+        this.songToEdit = song;
+        this.songModalisOpen = true;
+      },
+      editSongDismiss(song: SongItem) {
+        this.songModalisOpen = false;
+        if(this.songIsValid(song)) {
+          //update the song values
+        }
+      },
+    },
 })
 </script>
