@@ -1,5 +1,5 @@
-npm install vite @vitejs/plugin-vue --save-dev
-sudo npm install -g @ionic/cli @vue/cli @capacitor/preferences @capacitor/filesystem vitest
+sudo npm install -g jest-cli --save-dev
+sudo npm install -g @ionic/cli @vue/cli @capacitor/preferences @capacitor/filesystem @vue/cli-service
 code --install-extension vue.volar
 code --install-extension ms-vscode.vscode-typescript-next
 code --install-extension rbbit.typescript-hero

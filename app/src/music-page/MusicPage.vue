@@ -17,8 +17,8 @@
           <ion-icon icon="https://unpkg.com/ionicons@5.5.2/dist/svg/add-circle-outline.svg" size="large" />
         </ion-fab-button>
       </ion-fab>
-      <ion-modal :isOpen="songModalisOpen" @didDismiss="addSongDismiss" >
-        <song-modal :song="songToEdit" @dismissed="addSongDismiss" />
+      <ion-modal :isOpen="songModalisOpen" >
+        <song-modal :song="songToEdit" @dismissed="songModalDismiss" />
       </ion-modal>
     </ion-content>
   </ion-page>
@@ -92,14 +92,19 @@ import { SongItem } from './song-item';
         IonIcon,
     },
     methods: {
-      songModalOpen() {
+      songModalOpen(song?: SongItem) {
+        if(typeof song !== 'undefined') {
+          this.songToEdit = song;
+        }
         this.songModalisOpen = true;
       },
-      addSongDismiss(song: SongItem) {
+      songModalDismiss(song: SongItem) {
         this.songModalisOpen = false;
-        if(this.songIsValid(song)) {
-          this.songs.push(song);
+        this.songToEdit = undefined;
+        if(!this.songIsValid(song)) {
+          throw new Error("Error! Song "+ song + " is invalid!");
         }
+        this.saveSystem.saveSong(song);
       },
       async removeSong(song: SongItem) {
         if(!this.songs.includes(song)) {

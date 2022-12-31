@@ -9,7 +9,12 @@ export class SongRegistry {
         this.songRegistry.value = registry;
     }
 
-    public async push (path: string) {
+    public testMode(): SongRegistry {
+        this.STORAGE_KEY = "test";
+        return this;
+    }
+
+    public push = async (path: string) =>  {
         if(this.contains(path)) {
             throw new Error("Error! Cannot push path " + path + ", path already exists.");
         }
@@ -55,7 +60,6 @@ export class SongRegistry {
         }
         const index = this.songRegistry.value.indexOf(path);
         if(index === 0) {
-            console.debug("ERROR");
             throw new Error("Error! Cannot move up, entry is first in the registry!");
         }
         const nextPath = this.songRegistry.value[index - 1];
@@ -86,17 +90,15 @@ export class SongRegistry {
         });
     }
     public async loadCachedSongs() {
-        if(this.songRegistry.value.length !== 0) {
-            return;
-        }
-        console.log("Start Load");
         await Preferences.get({key: this.STORAGE_KEY}).then((data) => {
-            console.log("DATA = " + data.value);
             this.songRegistry.value = data.value ? JSON.parse(data.value) as string[] : new Array<string>;
         }).catch((error) => {
             console.error("ERROR!" + error);
         });
         
         console.log("End load");
+    }
+    public async clearCachedSongs() {
+
     }
 }

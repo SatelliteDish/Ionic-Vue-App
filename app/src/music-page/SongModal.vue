@@ -37,7 +37,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { SaveSystem } from "../save-system/save-system";
 import { Icons } from "../common/icons"
 import { IonContent,
          IonInput,
@@ -56,14 +55,12 @@ export default defineComponent({
     name: "SongModal",
     setup() {
         const icons = new Icons;
-        const saveSystem = new SaveSystem();
         return {
             url: "",
             name: "",
             artist: "",
             tags: [""],
             icons,
-            saveSystem,
         }
     },
     components: {
@@ -95,7 +92,6 @@ export default defineComponent({
             this.tags.push("");
         },
         submit() {
-            alert(this.tags[0] + " " + this.tags[1]);
             const protocol = "https://";
             if(this.tags.length < 1 || this.url === "" || this.name === "") {
                 alert("failed");
@@ -108,7 +104,6 @@ export default defineComponent({
             if(typeof this.song !== 'undefined') {
                 song = this.song;
             }
-            this.saveSystem.replaceSong(new SongItem(this.url,this.name,this.artist,this.tags),song);
             this.$emit('dismissed',song);
         },
     }

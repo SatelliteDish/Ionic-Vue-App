@@ -4,61 +4,65 @@ import { Preferences } from "@capacitor/preferences";
 import { ref} from "vue";
 import { SongRegistry } from "./song-registry";
 
-export class SaveSystem {    const SONG_STORAGE = "songs";
-    const SONG_PATH_ADD = "song.json";
+export class SaveSystem {
+    SONG_PATH_ADD = "song.json";
 
-    const test = false;
+    test = false;
 
-    const log = (message: string) => {
-        if(test){
+    log = (message: string) => {
+        if(this.test){
             console.log(message)
         }};
 
-    const SongPath = (song: SongItem) => song.name + SONG_PATH_ADD;
+    SongPath = (song: SongItem) => song.name + this.SONG_PATH_ADD;
 
-    const songRegistry = new SongRegistry([]);
+    songRegistry = new SongRegistry([]);
 
+    public async setup(testMode = false) {
+        if(testMode = true) {
+            await this.testMode();
+            return this;
+        }
+        await this.songRegistry.loadCachedSongs();
+        return this;
+    }
 
-
-    // async function loadSongs() {
-    //     if(songRegistry.value.length !== 0) {
-    //         return;
-    //     }
-    //     log("Start Load");
-    //     await Preferences.get({key: SONG_STORAGE}).then((data) => {
-    //         log("DATA = " + data.value);
-    //         songRegistry.value = data.value ? JSON.parse(data.value) as string[] : new Array<string>;
-    //     }).catch((error) => {
-    //         console.error("ERROR!" + error);
-    //     });
-        
-    //     log("End load");
-    // }
-
-    // async function cacheSongs() {
-    //     await Preferences.set({
-    //         key: SONG_STORAGE,
-    //         value: JSON.stringify(songRegistry.value),
-    //     });
-    // }
+    public async testMode() {
+        this.songRegistry.testMode();
+        await this.songRegistry.loadCachedSongs();
+        const testSongs = this.songRegistry.getRegistry();
+        for(var songs of testSongs) {
+            const song = await this.getSong(songs);
+            await this.removeSong(song);
+        }
+        return this;
+    }
 
     public async saveSong (song: SongItem): Promise<string> {
         const saveData: WriteFileOptions = {
-            path: song.name + SONG_PATH_ADD,
+            path: song.name + this.SONG_PATH_ADD,
             data: btoa(JSON.stringify(song)),
             directory: Directory.Data,
         };
-        log("Save Path = " + saveData.path);
-        log("Base 64 Encoded JSON = " + saveData.data);
-        log("JSON = " + atob(saveData.data));
-        await Filesystem.writeFile(saveData).then(() => log("Saved " + saveData.path));
-        await songRegistry.push(saveData.path,);
-        await Filesystem.readFile({path: saveData.path, directory: Directory.Data}).then(data => log(atob(data.data)));
+        {
+            this.log("Save Path = " + saveData.path);
+            this.log("Base 64 Encoded JSON = " + saveData.data);
+            this.log("JSON = " + atob(saveData.data));
+        }
+        try{
+            await this.songRegistry.push(saveData.path,);
+            await Filesystem.writeFile(saveData).then(() => this.log("Saved " + saveData.path));
+            await Filesystem.readFile({path: saveData.path, directory: Directory.Data})
+            .then(data => this.log(atob(data.data)));
+        }
+        catch (e) {
+            throw e;
+        }
         return saveData.path;
     }
 
-    export async function getSong(path: string): Promise<SongItem> {
-        log("Getting file at path " + path);
+    public async getSong(path: string): Promise<SongItem> {
+        this.log("Getting file at path " + path);
         const saveData: ReadFileOptions = {
             path: path,
             directory: Directory.Data,
@@ -75,31 +79,31 @@ export class SaveSystem {    const SONG_STORAGE = "songs";
         return result;
     }
 
-    export const getAllSongs = async (): Promise<SongItem[]> => {
-        const registryItems = songRegistry.getRegistry();
+    public async getAllSongs (): Promise<SongItem[]> {
+        const registryItems = this.songRegistry.getRegistry();
         const result: SongItem[] = [];
         for (let i = 0; i < registryItems.length; i++) {
-            const song = await getSong(registryItems[i]);
+            const song = await this.getSong(registryItems[i]);
             result.push(song);
         }
         return result;
     }
 
-    export async function removeSong(song: SongItem): Promise<void> {
-        const songPath = SongPath(song);
+    public async removeSong(song: SongItem): Promise<void> {
+        const songPath = this.SongPath(song);
 
-        await songRegistry.remove(songPath);
+        await this.songRegistry.remove(songPath);
 
         await Filesystem.deleteFile({
             path: songPath,
             directory: Directory.Data
-        }).then(() => log("Finished Deleting " + songPath + "!"));
+        }).then(() => this.log("Finished Deleting " + songPath + "!"));
     }
 
-    export async function replaceSong(origSong: SongItem, replaceWith: SongItem) {
-        const currentPath = SongPath(origSong);
-        await songRegistry.remove(currentPath);
+    public  async replaceSong(origSong: SongItem, replaceWith: SongItem) {
+        const currentPath = this.SongPath(origSong);
+        await this.songRegistry.remove(currentPath);
         await Filesystem.deleteFile({path: currentPath});
-        await saveSong(replaceWith);
+        await this.saveSong(replaceWith);
     }
 }
