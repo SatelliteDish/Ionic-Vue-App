@@ -1,7 +1,5 @@
 import { SongItem } from "@/music-page/song-item";
 import { Filesystem, Directory, WriteFileOptions, ReadFileOptions, ReadFileResult } from "@capacitor/filesystem";
-import { Preferences } from "@capacitor/preferences";
-import { ref} from "vue";
 import { SongRegistry } from "./song-registry";
 
 export class SaveSystem {
@@ -19,7 +17,7 @@ export class SaveSystem {
     songRegistry = new SongRegistry([]);
 
     public async setup(testMode = false) {
-        if(testMode = true) {
+        if(testMode == true) {
             await this.testMode();
             return this;
         }
@@ -31,7 +29,7 @@ export class SaveSystem {
         this.songRegistry.testMode();
         await this.songRegistry.loadCachedSongs();
         const testSongs = this.songRegistry.getRegistry();
-        for(var songs of testSongs) {
+        for(const songs of testSongs) {
             const song = await this.getSong(songs);
             await this.removeSong(song);
         }
@@ -44,20 +42,17 @@ export class SaveSystem {
             data: btoa(JSON.stringify(song)),
             directory: Directory.Data,
         };
+
         {
             this.log("Save Path = " + saveData.path);
             this.log("Base 64 Encoded JSON = " + saveData.data);
             this.log("JSON = " + atob(saveData.data));
         }
-        try{
-            await this.songRegistry.push(saveData.path,);
-            await Filesystem.writeFile(saveData).then(() => this.log("Saved " + saveData.path));
-            await Filesystem.readFile({path: saveData.path, directory: Directory.Data})
-            .then(data => this.log(atob(data.data)));
-        }
-        catch (e) {
-            throw e;
-        }
+
+        await this.songRegistry.push(saveData.path,);
+        await Filesystem.writeFile(saveData).then(() => this.log("Saved " + saveData.path));
+        await Filesystem.readFile({path: saveData.path, directory: Directory.Data})
+        .then(data => this.log(atob(data.data)));
         return saveData.path;
     }
 
@@ -86,6 +81,7 @@ export class SaveSystem {
             const song = await this.getSong(registryItems[i]);
             result.push(song);
         }
+        console.log(result);
         return result;
     }
 

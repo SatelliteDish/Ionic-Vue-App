@@ -7,19 +7,19 @@
         </ion-header>
         <ion-item>
             <ion-item>URL</ion-item>
-            <ion-input type="url" :value="url" v-model="url" @keydown.enter="submit"/>
+            <ion-input type="url" :value="song.url" v-model="newSong.url" @keydown.enter="submit"/>
         </ion-item>
         <ion-item>
             <ion-item>Name</ion-item> 
-            <ion-input :value="name" v-model="name" @keydown.enter="submit"/>
+            <ion-input :value="song.name" v-model="newSong.name" @keydown.enter="submit"/>
         </ion-item>
         <ion-item>
             <ion-item>Artist</ion-item>
-            <ion-input placeholder="Optional" :value="artist" v-model="artist" @keydown.enter="submit" />
+            <ion-input placeholder="Optional" :value="song.artist" v-model="newSong.artist" @keydown.enter="submit" />
         </ion-item>
-        <ion-item v-for="(tag, index) in tags" :key="index" >
+        <ion-item v-for="(tag, index) in song.tags" :key="index" >
             <ion-item>Tag</ion-item>
-            <ion-input placeholder="Optional" :value="tags[index]" :v-model="tag" :key="index" />
+            <ion-input placeholder="Optional" :value="song.tags[index]" :v-model="tag" :key="index" @keydown.enter="submit" />
         </ion-item>
                 <ion-item lines="none" >
             <ion-button slot="end" @click="addNewTag">
@@ -53,14 +53,15 @@ import { SongItem } from './song-item';
 
 export default defineComponent({ 
     name: "SongModal",
+    props: {
+        song: {type: Object as () => SongItem, required: true},
+        },
     setup() {
+        const newSong = new SongItem("","","",[""]);
         const icons = new Icons;
         return {
-            url: "",
-            name: "",
-            artist: "",
-            tags: [""],
             icons,
+            newSong,
         }
     },
     components: {
@@ -75,36 +76,25 @@ export default defineComponent({
         IonButton,
         IonIcon,
     },
-    created() {
-        if(typeof this.song !== 'undefined') {
-                this.url = this.song.url;
-                this.name = this.song.name;
-                this.artist = this.song.name;
-                this.tags = this.song.tags;
-            }
-        },
-    props: {
-        song: {type: Object as () => SongItem, required: false},
-        },
     methods: {
         addNewTag() {
-            console.log("Adding Tag")
-            this.tags.push("");
+            this.newSong.tags.push("");
         },
         submit() {
+            //TODO: Break this out to be more reusable
             const protocol = "https://";
-            if(this.tags.length < 1 || this.url === "" || this.name === "") {
-                alert("failed");
-                return;
+            try{
+                if(this.newSong.tags.length < 1 || this.newSong.url === "" || this.newSong.name === "") {
+                    alert("failed");
+                    return;
+                }
+            } catch (e: any) {
+                console.error(e);
             }
-            if(this.url.slice(0, protocol.length) !== protocol) {
-                this.url = protocol + this.url;
+            if(this.newSong.url.slice(0, protocol.length) !== protocol) {
+                this.newSong.url = protocol + this.newSong.url;
             }
-            let song: SongItem = new SongItem(this.url,this.name,this.artist,this.tags);
-            if(typeof this.song !== 'undefined') {
-                song = this.song;
-            }
-            this.$emit('dismissed',song);
+            this.$emit('dismissed',this.newSong);
         },
     }
 })

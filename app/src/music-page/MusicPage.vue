@@ -18,7 +18,7 @@
         </ion-fab-button>
       </ion-fab>
       <ion-modal :isOpen="songModalisOpen" >
-        <song-modal :song="songToEdit" @dismissed="songModalDismiss" />
+        <song-modal :song="songToEdit" @dismissed="songModalDismiss" @editSong="songModalOpen" />
       </ion-modal>
     </ion-content>
   </ion-page>
@@ -52,13 +52,8 @@ import { SongItem } from './song-item';
       const saveSystem = new SaveSystem();
       const songs = ref<SongItem[]>([]);
       const songModalisOpen = ref<boolean>(false);
-      let songToEdit: SongItem | undefined;
-      const songIsValid = (song: SongItem) => {
-        if(song.url.length === 0 || song.name.length === 0) {
-          return false;
-        }
-        return true;
-      }
+      let songToEdit = new SongItem("","","",[""]);
+
       
       return {
         saveSystem,
@@ -67,13 +62,10 @@ import { SongItem } from './song-item';
         searchField: "",
         songModalisOpen,
         songToEdit,
-        songIsValid,
       };
     },
     async mounted() {
-      console.log("Setup start!");
       await this.saveSystem.setup();
-      console.log("save system setup!");
       this.songs = await this.saveSystem.getAllSongs()
     },
     components: {
@@ -93,18 +85,25 @@ import { SongItem } from './song-item';
     },
     methods: {
       songModalOpen(song?: SongItem) {
-        if(typeof song !== 'undefined') {
+        if(song instanceof SongItem) {
           this.songToEdit = song;
         }
         this.songModalisOpen = true;
       },
-      songModalDismiss(song: SongItem) {
+      async songModalDismiss(song: SongItem) {
         this.songModalisOpen = false;
-        this.songToEdit = undefined;
         if(!this.songIsValid(song)) {
           throw new Error("Error! Song "+ song + " is invalid!");
         }
-        this.saveSystem.saveSong(song);
+
+        const wasEdit = this.songToEdit.name !== "";
+        if(wasEdit) {
+          await this.saveSystem.removeSong(this.songToEdit);
+          this.songs = await this.saveSystem.getAllSongs();
+        }
+        //this.songToEdit = new SongItem("","","",[""]);
+        await this.saveSystem.saveSong(song);
+        this.songs.push(song);
       },
       async removeSong(song: SongItem) {
         if(!this.songs.includes(song)) {
@@ -124,12 +123,21 @@ import { SongItem } from './song-item';
         this.songToEdit = song;
         this.songModalisOpen = true;
       },
-      editSongDismiss(song: SongItem) {
+      async editSongDismiss(song: SongItem) {
         this.songModalisOpen = false;
-        if(this.songIsValid(song)) {
-          //update the song values
+        if(!this.songIsValid(song)) {
+          throw new Error("Error, song modal returned invalid song");
         }
+        console.log("saving " + song.name);
+        await this.saveSystem.saveSong(song);
+        console.log("pushed " + song.name);
       },
+      songIsValid (song: SongItem): boolean {
+        if(song.url.length === 0 || song.name.length === 0) {
+          return false;
+        }
+        return true;
+      }
     },
 })
 </script>

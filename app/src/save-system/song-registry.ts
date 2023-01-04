@@ -98,7 +98,9 @@ export class SongRegistry {
         
         console.log("End load");
     }
-    public async clearCachedSongs() {
 
-    }
+    //TODO: Add this
+    // public async clearCachedSongs() {
+
+    // }
 }
