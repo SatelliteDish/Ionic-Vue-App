@@ -17,7 +17,7 @@
           <ion-icon icon="https://unpkg.com/ionicons@5.5.2/dist/svg/add-circle-outline.svg" size="large" />
         </ion-fab-button>
       </ion-fab>
-      <ion-modal :isOpen="songModalisOpen" >
+      <ion-modal :isOpen="songModalisOpen" @didDismiss="songModalDismiss" >
         <song-modal :song="songToEdit" @dismissed="songModalDismiss" @editSong="songModalOpen" />
       </ion-modal>
     </ion-content>
@@ -52,7 +52,7 @@ import { SongItem } from './song-item';
       const saveSystem = new SaveSystem();
       const songs = ref<SongItem[]>([]);
       const songModalisOpen = ref<boolean>(false);
-      let songToEdit = new SongItem("","","",[""]);
+      let songToEdit = new SongItem("","","");
 
       
       return {
@@ -92,16 +92,18 @@ import { SongItem } from './song-item';
       },
       async songModalDismiss(song: SongItem) {
         this.songModalisOpen = false;
+        
         if(!this.songIsValid(song)) {
-          throw new Error("Error! Song "+ song + " is invalid!");
+          return;
         }
+        console.log(song);
 
         const wasEdit = this.songToEdit.name !== "";
         if(wasEdit) {
           await this.saveSystem.removeSong(this.songToEdit);
           this.songs = await this.saveSystem.getAllSongs();
         }
-        //this.songToEdit = new SongItem("","","",[""]);
+        this.songToEdit = new SongItem("","","");
         await this.saveSystem.saveSong(song);
         this.songs.push(song);
       },
@@ -123,20 +125,15 @@ import { SongItem } from './song-item';
         this.songToEdit = song;
         this.songModalisOpen = true;
       },
-      async editSongDismiss(song: SongItem) {
-        this.songModalisOpen = false;
-        if(!this.songIsValid(song)) {
-          throw new Error("Error, song modal returned invalid song");
+      songIsValid (song: SongItem): boolean { //TODO: Move this to songmodal, so it can be validated before closing
+        const nameIsValid = song.name.length !== 0;
+        const urlIsValid = song.url.length !== 0;
+        if(song instanceof SongItem) {
+          if(urlIsValid && nameIsValid) {//needs to be nested
+            return true;
+          }
         }
-        console.log("saving " + song.name);
-        await this.saveSystem.saveSong(song);
-        console.log("pushed " + song.name);
-      },
-      songIsValid (song: SongItem): boolean {
-        if(song.url.length === 0 || song.name.length === 0) {
-          return false;
-        }
-        return true;
+        return false;
       }
     },
 })

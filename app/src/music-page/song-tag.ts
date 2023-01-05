@@ -1,8 +1,8 @@
 export class SongTag {
-    name: string = '';
-    color: string = '';
+    name = '';
+    color = '';
     constructor(name: string, color: string) {
         this.name = name;
         this.color = color;
     }
-};
+}

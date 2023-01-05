@@ -1,6 +1,6 @@
 <template>
   <ion-item>
-    <ion-chip>{{ tag.name }}</ion-chip>
+    <ion-chip :style="cssVars">{{ tag.name }}</ion-chip>
   </ion-item>
 </template>
 
@@ -18,8 +18,19 @@ export default defineComponent({
     props: {
       tag: {type: Object as () => SongTag, required: true},  
     },
-    setup() {
-        
+    computed: {
+      cssVars() {
+        return {
+          "--bg-color": this.tag.color,
+        }
+      }
     },
 })
 </script>
+
+<style scoped>
+  ion-chip {
+    --background: var(--bg-color)
+  }
+
+</style>

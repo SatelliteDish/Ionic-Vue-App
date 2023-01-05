@@ -17,9 +17,10 @@
             <ion-item>Artist</ion-item>
             <ion-input placeholder="Optional" :value="song.artist" v-model="newSong.artist" @keydown.enter="submit" />
         </ion-item>
-        <ion-item v-for="(tag, index) in song.tags" :key="index" >
+        <ion-item v-for="(tag, index) in tags" :key="index" >
             <ion-item>Tag</ion-item>
-            <ion-input placeholder="Optional" :value="song.tags[index]" :v-model="tag" :key="index" @keydown.enter="submit" />
+            <ion-input placeholder="Optional" :value="tag.name" v-model="tag.name" @keydown.enter="submit" />
+            <ion-input placeholder="Optional" :value="tag.color" v-model="tag.color" @keydown.enter="submit" />
         </ion-item>
                 <ion-item lines="none" >
             <ion-button slot="end" @click="addNewTag">
@@ -50,6 +51,8 @@ import { IonContent,
          IonIcon,
         } from '@ionic/vue';
 import { SongItem } from './song-item';
+import { SongTag } from './song-tag';
+import { ref } from 'vue';
 
 export default defineComponent({ 
     name: "SongModal",
@@ -57,18 +60,20 @@ export default defineComponent({
         song: {type: Object as () => SongItem, required: true},
         },
     setup() {
-        const newSong = new SongItem("","","",[""]);
+        const newSong = new SongItem("","","");
         const icons = new Icons;
+        const tags = ref<SongTag[]>([]);
         return {
             icons,
             newSong,
+            tags,
         }
     },
     mounted() {
         this.newSong.url = this.song.url;
         this.newSong.name = this.song.name;
         this.newSong.artist = this.song.artist;
-        this.newSong.tags = this.song.tags;
+        this.tags = this.song.tags;
     },
     components: {
         IonContent,
@@ -84,7 +89,7 @@ export default defineComponent({
     },
     methods: {
         addNewTag() {
-            this.newSong.tags.push("");
+            this.tags.push(new SongTag("",""));
         },
         submit() {
             //TODO: Break this out to be more reusable
@@ -97,9 +102,14 @@ export default defineComponent({
             } catch (e: any) {
                 console.error(e);
             }
+            const lastTagName = this.tags[this.tags.length-1].name;
+            if(lastTagName === "") {
+                this.tags.pop();
+            }
             if(this.newSong.url.slice(0, protocol.length) !== protocol) {
                 this.newSong.url = protocol + this.newSong.url;
             }
+            this.newSong.tags = this.tags;
             this.$emit('dismissed',this.newSong);
         },
     }

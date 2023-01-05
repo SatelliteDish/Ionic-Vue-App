@@ -3,7 +3,7 @@
         <ion-item :href="song.url">{{song.name}}</ion-item>
         <ion-item v-if="song.artist !== ''" >{{song.artist}}</ion-item>
         <ion-list v-for="(tag, index) in song.tags" :key="index">
-            <ion-chip color="danger">{{tag}} </ion-chip>
+            <tag-component :tag="tag" />
         </ion-list>
         <ion-button slot="end" fill="clear" size="small" @click="editSong" >
             <ion-icon :icon="editIcon" size="large" />
@@ -16,8 +16,9 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { IonItem, IonList, IonChip, IonButton, IonIcon } from '@ionic/vue';
+import { IonItem, IonList, IonButton, IonIcon } from '@ionic/vue';
 import { SongItem } from './song-item';
+import TagComponent from './TagComponent.vue';
 
 export default defineComponent({
     name: "SongComponent",
@@ -35,9 +36,9 @@ export default defineComponent({
     components: {
         IonItem,
         IonList,
-        IonChip,
         IonButton,
         IonIcon,
+        TagComponent,
     },
     methods: {
         removeSong() {

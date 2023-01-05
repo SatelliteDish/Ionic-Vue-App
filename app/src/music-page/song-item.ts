@@ -4,13 +4,15 @@ export class SongItem {
     url = '';
     name = '';
     artist = '';
-    tags: string[] = [];
-    constructor(url: string, name: string, artist: string ,tags: string[]) {
+    tags: SongTag[] = [new SongTag('','')];
+    constructor(url: string, name: string, artist: string ,tags?: SongTag[]) {
         this.url = url;
         this.name = name;
         this.artist = artist;
-        this.tags = tags;
+        if(typeof tags !== 'undefined') {
+            this.tags = tags;
+        }
     }
 
-    public containsTag = (tag: string) => this.tags.includes(tag); 
+    public containsTag = (tag: SongTag) => this.tags.includes(tag); 
 }
