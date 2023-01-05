@@ -1,4 +1,4 @@
-// import { SongTag } from "./song-tag"
+import { SongTag } from "./song-tag"
 
 export class SongItem {
     url = '';

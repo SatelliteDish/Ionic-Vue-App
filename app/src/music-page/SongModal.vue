@@ -64,6 +64,12 @@ export default defineComponent({
             newSong,
         }
     },
+    mounted() {
+        this.newSong.url = this.song.url;
+        this.newSong.name = this.song.name;
+        this.newSong.artist = this.song.artist;
+        this.newSong.tags = this.song.tags;
+    },
     components: {
         IonContent,
         IonInput,
